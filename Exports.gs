@@ -185,13 +185,20 @@ var Exports = {
   },
 
   
+
   /**
    * for validating attempts to access non existent properties
    */
   get validateProperties() {
     return {
       get(target, prop, receiver) {
-        if (!Reflect.has(target, prop)) throw `guard detected attempt to get non-existent property ${prop}`
+        // typeof and console use the inspect prop
+        if (
+          typeof prop !== 'symbol' &&
+          prop !== 'inspect' &&
+          !Reflect.has(target, prop)
+        ) throw `guard detected attempt to get non-existent property ${prop}`
+
         return Reflect.get(target, prop, receiver)
       },
 
@@ -200,7 +207,7 @@ var Exports = {
         return Reflect.set(target, prop, value, receiver)
       }
     }
-  },
+  }
 
 }
 
