@@ -24,8 +24,10 @@ class Fetch {
    * get header including oauth token
    */
   getHeaders(headers) {
+    headers = headers || {}
+    if (!this.tokenService) return headers 
     return {
-      ...(headers || {}),
+      ...headers,
       Authorization: `Bearer ${this.tokenService()}`
     }
   }
