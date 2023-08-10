@@ -132,6 +132,23 @@ var Exports = {
   },
 
   /**
+   * Speech class
+   * @implements {Speech} 
+   */
+  get Speech() {
+    return Speech
+  },
+
+  /**
+   * speech instance with validation
+   * @param {...*} args
+   * @return {Speech} a proxied instance of Drv with property checking enabled
+   */
+  newSpeech(...args) {
+    return this.guard(new this.Speech(...args))
+  },
+
+  /**
    * Drv instance with validation
    * @param {...*} args
    * @return {Drv} a proxied instance of Drv with property checking enabled
