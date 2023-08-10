@@ -174,17 +174,16 @@ class Drv {
    * upload a file
    * @return {FetcherResponse}
    */
-  upload({ blob, noisy, md5Name = true, throwOnError = true, mimeType, temp = true, parentId = null }, ...params) {
+  upload({ blob, noisy, md5Name = false, throwOnError = true, mimeType, temp = false, parentId = null }, ...params) {
 
 
     const fetcher = this._plainFetcher(this.uploadEndpoint)
 
     // the name we'll write to storage cound be the md5
     const tempName = temp ? this.getTempName() : ''
-    const name = tempName + (md5Name ? Exports.Utils.md5Checksum(blob) : blob.getName())
-    if (noisy) console.log('..uploading', name)
-    const metadata = temp ? { parents: ['appDataFolder'] } : parentId
-
+    const name = tempName + ((md5Name || !blob.getName()) ? Exports.Utils.md5Checksum(blob) : blob.getName())
+    const metadata = temp ? { parents: ['appDataFolder'] } : (parentId ? {parents: [parentId]} :{})
+    if (noisy) console.log('..uploading', name, parentId, metadata)
     // the multipart boundary - could be anything
     const boundary = Exports.Utils.boundary()
 
