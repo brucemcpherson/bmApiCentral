@@ -183,7 +183,16 @@ class Drv {
     const tempName = temp ? this.getTempName() : ''
     const name = tempName + ((md5Name || !blob.getName()) ? Exports.Utils.md5Checksum(blob) : blob.getName())
     const metadata = temp ? { parents: ['appDataFolder'] } : (parentId ? {parents: [parentId]} :{})
-    if (noisy) console.log('..uploading', name, parentId, metadata)
+    if (noisy) {
+      console.log("uploading", {
+        parentId,
+        metadata,
+        name,
+        tempName,
+        md5Name
+      })
+
+    }
     // the multipart boundary - could be anything
     const boundary = Exports.Utils.boundary()
 
@@ -226,10 +235,18 @@ class Drv {
     */
   getFilesInFolder({ path = '/', throwOnError, noisy, noCache, query, recurse = false }, ...params) {
     // sort out the folder path
+    
     const result = this.getFolder({ noisy, noCache, throwOnError, path, createIfMissing: false }, ...params)
+    if (noisy) {
+      console.log ('...getfilesinfolder', {noCache,path,query }, {error: result.error, data: result.data })
+    }
     if (result.error) return result
 
-    const fileResult = this.list({ id: result.data.id, throwOnError, noisy, noCache, query }, ...params)
+    const id = result.data.id
+    const fileResult = this.list({ id, throwOnError, noisy, noCache, query }, ...params)
+    if (noisy) {
+      console.log ('...getfilesinfolder-fileresult', {id, noCache,path,query },{error: fileResult.error, data: fileResult.data })
+    }
     return {
       ...fileResult,
       data: {
@@ -358,7 +375,9 @@ class Drv {
 
     if (Exports.Utils.isNU(id)) throw 'folder list id cannot be null or undefined'
     const fetcher = this._plainFetcher(this.listEndpoint)
-
+    if (noisy) {
+      console.log ('...listing folder', {id, noCache,title})
+    }
     return fetcher.fetch({
       noCache,
       noisy,
@@ -441,9 +460,13 @@ class Drv {
    */
   _getFolder({ parentId, title, createIfMissing, path, noisy, noCache, throwOnError }) {
 
+    noCache= noCache || createIfMissing
+    if (noisy) {
+      console.log ('...in getFolder', {parentId, noCache, title})
+    }
     // if we're potentially writing, we want to make sure there's no caching to confuse things
     let result = this.list({
-      noCache: noCache || createIfMissing,
+      noCache,
       noisy,
       throwOnError,
       id: parentId,
@@ -498,7 +521,7 @@ class Drv {
       const path = titles.slice(0, i + 1).join("/")
       const title = titles[i]
       if (title) {
-        parent = this._getFolder({ parentId, title, createIfMissing, path, noisy, throwOnError })
+        parent = this._getFolder({ parentId, title, noCache, createIfMissing, path, noisy, throwOnError })
       } else {
         parent.error = 'blank folder name not allowed'
       }
